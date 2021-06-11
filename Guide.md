@@ -1,5 +1,13 @@
 Guide to get FFXIV and ACT working in wine/proton on Linux. Last updated 2019-09-18.
 
+# My shitty fork
+
+This is forked from [a very helpful repo](https://github.com/valarnin/ffxiv-tools), and I have ripped out a lot of the very sensible code for managing older versions of Proton, made it more compatible with a Lutris Wine install, and also added compatability for using [XIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher) instead of the official launcher.
+
+Basically, if you're on a fresh install, run `wine --version`, and get a number bigger than '5.2' then it should work. Don't @ me though. 
+
+Follow the guide below - just ignore all the Steam/Proton parts. 
+
 # Table of Contents
 
    * [Preamble](#preamble)

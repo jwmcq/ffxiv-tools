@@ -19,7 +19,7 @@ echo 'Sourcing the FFXIV environment'
 echo
 echo "Making sure wine isn't running anything"
 
-FFXIV_PID="$(ps axo pid,cmd | grep -Pi 'ffxivlauncher(|64).exe' | grep -vi grep | sed -e 's/^[[:space:]]*//' | cut -d' ' -f1)"
+FFXIV_PID="$(ps axo pid,cmd | grep -Pi '(|ff)xivlauncher(|64).exe' | grep -vi grep | sed -e 's/^[[:space:]]*//' | cut -d' ' -f1)"
 
 if [[ "$FFXIV_PID" != "" ]]; then
     warn "FFXIV launcher detected as running, forceably closing it"
@@ -32,10 +32,10 @@ PROTON_VERSION_FULL="$(cat "$PROTON_DIST_PATH/version" | cut -d' ' -f2 | cut -d'
 PROTON_VERSION_MAJOR="$(echo "$PROTON_VERSION_FULL" | cut -d'.' -f1)"
 PROTON_VERSION_MINOR="$(echo "$PROTON_VERSION_FULL" | cut -d'.' -f2)"
 
-if [[ "$PROTON_VERSION_FULL" == "" || "$PROTON_VERSION_MAJOR" == "" || "$PROTON_VERSION_MINOR" == "" ]]; then
-    error "Could not detect Proton version. Please request help in the #ffxiv-linux-discussion channel of the discord."
-    exit 1
-fi
+# if [[ "$PROTON_VERSION_FULL" == "" || "$PROTON_VERSION_MAJOR" == "" || "$PROTON_VERSION_MINOR" == "" ]]; then
+#     error "Could not detect Proton version. Please request help in the #ffxiv-linux-discussion channel of the discord."
+#     exit 1
+# fi
 
 warn 'Note that this process is destructive, meaning that if something goes wrong it can break your wine prefix and/or your proton runner installation'
 echo 'Please make backups of both!'
@@ -164,26 +164,26 @@ if [[ "$(patchelf --print-rpath "$(which wine)" | grep '$ORIGIN')" != "" ]]; the
     patchelf --set-rpath "$RPATH" "$(which wine)"
     patchelf --set-rpath "$RPATH" "$(which wine64)"
     patchelf --set-rpath "$RPATH" "$(which wineserver)"
-    PATCH_LIB_RPATH="Yes"
-    if [[ "$PROTON_VERSION_MAJOR" -ge "5" ]]; then
-        warn 'Detected a Proton version greater than 4.X'
-        echo 'There was a change in wine/proton somewhere after 4.21 which caused the libraries to not need their rpath patched'
-        echo 'The lowest known version after 4.21 which does not require the rpath to be patched is 5.2'
-        if [[ "$PROTON_VERSION_MAJOR" -gt "5" || "$PROTON_VERSION_MINOR" -ge "2" ]]; then
-            success 'Detected proton version 5.2 or later, skipping patching the rpath'
-            PATCH_LIB_RPATH="No"
-        else
-            PATCH_LIB_RPATH=""
-            warn 'Please let us know what your proton version is and if patching the rpath was required, so that we can narrow the window for where this change was made.'
-            while [[ "$PATCH_LIB_RPATH" != "Yes" && "$PATCH_LIB_RPATH" != "No" ]]; do
-                read -p "Do you want to patch the rpath? [Yes/No] " PATCH_LIB_RPATH
-            done
-        fi
-    fi
-    if [[ "$PATCH_LIB_RPATH" == "Yes" ]]; then
-        find "${PROTON_DIST_PATH}/lib64" -type f | xargs -I{} patchelf --set-rpath "$RPATH" {} &> /dev/null
-        find "${PROTON_DIST_PATH}/lib" -type f | xargs -I{} patchelf --set-rpath "$RPATH" {} &> /dev/null
-    fi
+    PATCH_LIB_RPATH="No"
+    # if [[ "$PROTON_VERSION_MAJOR" -ge "5" ]]; then
+    #     warn 'Detected a Proton version greater than 4.X'
+    #     echo 'There was a change in wine/proton somewhere after 4.21 which caused the libraries to not need their rpath patched'
+    #     echo 'The lowest known version after 4.21 which does not require the rpath to be patched is 5.2'
+    #     if [[ "$PROTON_VERSION_MAJOR" -gt "5" || "$PROTON_VERSION_MINOR" -ge "2" ]]; then
+    #         success 'Detected proton version 5.2 or later, skipping patching the rpath'
+    #         PATCH_LIB_RPATH="No"
+    #     else
+    #         PATCH_LIB_RPATH=""
+    #         warn 'Please let us know what your proton version is and if patching the rpath was required, so that we can narrow the window for where this change was made.'
+    #         while [[ "$PATCH_LIB_RPATH" != "Yes" && "$PATCH_LIB_RPATH" != "No" ]]; do
+    #             read -p "Do you want to patch the rpath? [Yes/No] " PATCH_LIB_RPATH
+    #         done
+    #     fi
+    # fi
+    # if [[ "$PATCH_LIB_RPATH" == "Yes" ]]; then
+    #     find "${PROTON_DIST_PATH}/lib64" -type f | xargs -I{} patchelf --set-rpath "$RPATH" {} &> /dev/null
+    #     find "${PROTON_DIST_PATH}/lib" -type f | xargs -I{} patchelf --set-rpath "$RPATH" {} &> /dev/null
+    # fi
 fi
 
 echo 'Checking to see if wine binaries need their capabilities set'
